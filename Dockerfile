@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN set -x \
     && DEBIAN_FRONTEND=noninteractive  apt-get update \
