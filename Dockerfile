@@ -37,6 +37,8 @@ RUN ./scripts/build_python.sh --chip_detail_logging true
 #RUN ["/bin/bash", "-c", "pip install ipykernel"]
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && pip install ipykernel"]
 
+RUN scripts/examples/gn_build_example.sh examples/all-clusters-app/linux out/debug 'chip_config_network_layer_ble=false'
+
 USER root
 WORKDIR ${HOME}/devel/connectedhomeip
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
