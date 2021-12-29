@@ -36,12 +36,12 @@ RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && pip install ipy
 
 RUN scripts/examples/gn_build_example.sh examples/all-clusters-app/linux out/debug 'chip_config_network_layer_ble=false'
 
+USER root
 ENV TINI_VERSION v0.16.1
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-USER root
 WORKDIR ${HOME}/devel/connectedhomeip
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
 USER ${NB_USER}
