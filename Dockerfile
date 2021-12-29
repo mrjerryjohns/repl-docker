@@ -46,7 +46,7 @@ WORKDIR ${HOME}/devel/connectedhomeip
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
 USER ${NB_USER}
 
-COPY . ${HOME}
+COPY . ${HOME}/devel/connectedhomeip
 
 #WORKDIR ../../
 
