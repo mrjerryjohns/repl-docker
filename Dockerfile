@@ -55,8 +55,7 @@ RUN rm -rf debug/.[!.]*
 RUN mv chip-all-clusters-app debug
 WORKDIR ..
 
-#
-#RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
-#USER ${NB_USER}
-# 
-#COPY . ${HOME}/devel/connectedhomeip
+RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
+USER ${NB_USER}
+
+COPY . ${HOME}/devel/connectedhomeip
