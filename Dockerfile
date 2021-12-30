@@ -40,11 +40,23 @@ RUN chmod +x /usr/bin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
 WORKDIR ${HOME}/devel/connectedhomeip
-RUN find . -type d -depth 1 ! -name "out" -delete
-WORKDIR out
-RUN find . ! -name "chip-all-clusters-app" -delete
+RUN mv out ../
+WORKDIR ../
+RUN rm -rf connectedhomeip/*
+RUN rm -rf connectedhomeip/.[!.]*
+RUN mv out connectedhomeip
+WORKDIR connectedhomeip
 
-RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
-USER ${NB_USER}
+WORKDIR out/debug
+RUN mv chip-all-clusters-app ../
+WORKDIR ..
+RUN rm -rf debug/*
+RUN rm -rf debug/.[!.]*
+RUN mv chip-all-clusters-app debug
+WORKDIR ..
 
-COPY . ${HOME}/devel/connectedhomeip
+#
+#RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
+#USER ${NB_USER}
+# 
+#COPY . ${HOME}/devel/connectedhomeip
