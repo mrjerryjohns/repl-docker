@@ -29,9 +29,6 @@ WORKDIR connectedhomeip
 RUN git fetch
 RUN ["/bin/bash", "-c", "source scripts/activate.sh"]
 RUN ./scripts/build_python.sh --chip_detail_logging true
-#RUN ["/bin/bash", "-c", "virtualenv ./out/python_env"]
-#RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate"]
-#RUN ["/bin/bash", "-c", "pip install ipykernel"]
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && pip install ipykernel"]
 
 RUN scripts/examples/gn_build_example.sh examples/all-clusters-app/linux out/debug 'chip_config_network_layer_ble=false'
@@ -43,17 +40,11 @@ RUN chmod +x /usr/bin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
 WORKDIR ${HOME}/devel/connectedhomeip
+RUN find . -type d -depth 1 ! -name "out" -delete
+WORKDIR out
+RUN find . ! -name "chip-all-clusters-app" -delete
+
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
 USER ${NB_USER}
 
 COPY . ${HOME}/devel/connectedhomeip
-
-#WORKDIR ../../
-
-#ENV HOME=/tmp
-
-
-#COPY . ${HOME}
-#USER root
-#RUN chown -R ${NB_UID} ${HOME}
-#USER ${NB_USER}
