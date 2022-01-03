@@ -56,6 +56,7 @@ RUN mv chip-all-clusters-app debug
 WORKDIR ..
 
 RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
+RUN pip install --no-cache jupyterlab-system-monitor
 USER ${NB_USER}
 
 COPY . ${HOME}/devel/connectedhomeip
