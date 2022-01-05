@@ -1,0 +1,69 @@
+ARG OWNER=jupyter
+ARG BASE_CONTAINER=$OWNER/base-notebook:33add21fab64
+FROM $BASE_CONTAINER
+
+LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
+ENV TAG="33add21fab64"
+
+USER root
+
+RUN set -x \
+    && DEBIAN_FRONTEND=noninteractive  apt-get update \
+    && DEBIAN_FRONTEND=noninteractive  apt-get install -y --no-install-recommends tzdata \
+    && DEBIAN_FRONTEND=noninteractive  apt-get -y update \
+    && :
+
+RUN apt-get install -y build-essential python3.9 python3-pip
+RUN pip3 -q install pip --upgrade
+RUN pip3 install --no-cache notebook jupyterlab jupyterhub ipykernel
+RUN apt-get install -y git gcc g++ python pkg-config libssl-dev libdbus-1-dev libglib2.0-dev libavahi-client-dev ninja-build python3-venv python3-dev python3-pip unzip libgirepository1.0-dev libcairo2-dev
+
+USER ${NB_USER}
+
+WORKDIR ${HOME}
+RUN mkdir devel
+WORKDIR devel
+RUN echo hello
+RUN git clone -b python/persistent-storage --depth 1 https://github.com/mrjerryjohns/connectedhomeip.git
+
+WORKDIR connectedhomeip
+RUN git fetch
+RUN git config --global http.sslverify false
+RUN ["/bin/bash", "-c", "source scripts/activate.sh"]
+RUN ./scripts/build_python.sh --chip_detail_logging true
+RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && pip install ipykernel"]
+
+RUN scripts/examples/gn_build_example.sh examples/all-clusters-app/linux out/debug 'chip_config_network_layer_ble=false'
+
+WORKDIR ${HOME}/devel/connectedhomeip
+RUN mv out ../
+WORKDIR ../
+RUN rm -rf connectedhomeip/*
+RUN rm -rf connectedhomeip/.[!.]*
+RUN mv out connectedhomeip
+WORKDIR connectedhomeip
+
+WORKDIR out/debug
+RUN mv chip-all-clusters-app ../
+WORKDIR ..
+RUN rm -rf debug/*
+RUN rm -rf debug/.[!.]*
+RUN mv chip-all-clusters-app debug
+WORKDIR ..
+
+USER root
+RUN ["/bin/bash", "-c", "source ./out/python_env/bin/activate && python -m ipykernel install --name=matter-env"]
+
+USER ${NB_USER}
+WORKDIR "${HOME}"
+RUN rm -rf .cipd-cache-dir
+WORKDIR devel/connectedhomeip
+COPY *.ipynb .
+
+USER root
+RUN pip3 install --no-cache nbgitpuller
+RUN fix-permissions *.ipynb
+
+USER ${NB_UID}
+
+WORKDIR "${HOME}/devel/connectedhomeip"
